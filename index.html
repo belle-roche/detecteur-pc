@@ -1,836 +1,445 @@
 <!DOCTYPE html>
 <html lang="fr" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC Tech Tracer - Dashboard & Bot Tracker</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            900: '#14532d',
-                        },
-                        darkbg: '#0b0f17',
-                        cardbg: '#111827',
-                        panelbg: '#1f2937'
-                    }
-                }
-            }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DealScanner Pro — PC 1440p & Vinyles</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#0284c7', 600: '#0284c7', 700: '#0369a1' }
+          }
         }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        code, pre { font-family: 'JetBrains Mono', monospace; }
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0f17; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
-    </style>
+      }
+    }
+  </script>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
 
-    <!-- Top Header -->
-    <header class="border-b border-slate-800 bg-cardbg/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-brand-500/20">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-none text-white">PC Upgrade Tracer <span class="text-xs font-normal text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-full ml-2">Objet 1440p (&le; 400€ Net)</span></h1>
-                    <p class="text-xs text-slate-400 mt-0.5">Budget max global: <span class="text-amber-400 font-semibold">530 €</span> (Revente estimée: -165 €)</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-                <button id="live-sim-btn" onclick="toggleSimulation()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-brand-600 hover:bg-brand-500 text-white flex items-center gap-2 transition shadow-md shadow-brand-600/30">
-                    <span class="w-2 h-2 rounded-full bg-white animate-ping" id="sim-ping"></span>
-                    <i class="fa-solid fa-play"></i> <span id="sim-btn-text">Lancer Simulation Webhook</span>
-                </button>
-                <button onclick="switchTab('code')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-2 transition">
-                    <i class="fa-solid fa-code"></i> Code Backend Python / Supabase
-                </button>
-            </div>
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-sky-500/10 text-sky-400 rounded-lg border border-sky-500/20">
+          <i data-lucide="radar" class="w-6 h-6"></i>
         </div>
-    </header>
-
-    <!-- Main Workspace -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Navigation Tabs -->
-        <div class="flex border-b border-slate-800 space-x-8 text-sm font-medium">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn pb-3 border-b-2 border-brand-500 text-brand-500 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line"></i> Dashboard Tracer & Annoce Feed
-            </button>
-            <button onclick="switchTab('rules')" id="tab-rules" class="tab-btn pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-sliders"></i> Configuration & Règles Target
-            </button>
-            <button onclick="switchTab('code')" id="tab-code" class="tab-btn pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
-                <i class="fa-brands fa-python"></i> Bot Python & Supabase Script
-            </button>
+        <div>
+          <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            DealScanner Pro
+            <span class="text-xs font-mono px-2 py-0.5 bg-sky-500/20 text-sky-300 rounded border border-sky-500/30">GitHub Pages Edition</span>
+          </h1>
+          <p class="text-xs text-slate-400">Monitoring sans base de données — Upgrade PC 1440p & Vinyles</p>
         </div>
+      </div>
 
-        <!-- TAB 1: DASHBOARD -->
-        <div id="view-dashboard" class="space-y-6">
-            
-            <!-- Summary Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-cardbg p-4 rounded-xl border border-slate-800 relative overflow-hidden">
-                    <div class="text-xs font-semibold text-slate-400 uppercase">Budget Achat Max</div>
-                    <div class="text-2xl font-bold text-white mt-1">530 €</div>
-                    <div class="text-xs text-slate-500 mt-1">Ancien Kit Z97 + RX580 : -160 à -185 €</div>
-                    <div class="absolute top-4 right-4 text-slate-700 text-2xl"><i class="fa-solid fa-wallet"></i></div>
-                </div>
-                <div class="bg-cardbg p-4 rounded-xl border border-slate-800 relative overflow-hidden">
-                    <div class="text-xs font-semibold text-slate-400 uppercase">Alertes Détectées</div>
-                    <div class="text-2xl font-bold text-emerald-400 mt-1" id="alert-count">0</div>
-                    <div class="text-xs text-slate-500 mt-1"><span id="jackpot-count" class="text-amber-400 font-bold">0</span> Prix Jackpot !</div>
-                    <div class="absolute top-4 right-4 text-emerald-950 text-2xl"><i class="fa-solid fa-bell"></i></div>
-                </div>
-                <div class="bg-cardbg p-4 rounded-xl border border-slate-800 relative overflow-hidden">
-                    <div class="text-xs font-semibold text-slate-400 uppercase">Filtres de Sécurité</div>
-                    <div class="text-2xl font-bold text-slate-200 mt-1">6 Exclusions</div>
-                    <div class="text-xs text-slate-500 mt-1">HS, Pièces, Pins tordus, etc.</div>
-                    <div class="absolute top-4 right-4 text-slate-700 text-2xl"><i class="fa-solid fa-shield-halved"></i></div>
-                </div>
-                <div class="bg-cardbg p-4 rounded-xl border border-slate-800 relative overflow-hidden">
-                    <div class="text-xs font-semibold text-slate-400 uppercase">Plateformes Tracées</div>
-                    <div class="text-2xl font-bold text-sky-400 mt-1">LeBonCoin + Ebay</div>
-                    <div class="text-xs text-slate-500 mt-1">Filtre Livraison Actif <i class="fa-solid fa-truck text-emerald-400 ml-1"></i></div>
-                    <div class="absolute top-4 right-4 text-sky-950 text-2xl"><i class="fa-solid fa-magnifying-glass"></i></div>
-                </div>
-            </div>
+      <div class="flex items-center gap-2 bg-slate-800/80 p-1 rounded-lg border border-slate-700">
+        <button id="tab-dashboard" onclick="switchTab('dashboard')" class="px-3 py-1.5 text-xs font-medium rounded-md bg-sky-600 text-white shadow transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-1"></i> Tableau de bord
+        </button>
+        <button id="tab-rules" onclick="switchTab('rules')" class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-400 hover:text-white transition">
+          <i data-lucide="sliders" class="w-4 h-4 inline mr-1"></i> Règles & Filtres
+        </button>
+        <button id="tab-code" onclick="switchTab('code')" class="px-3 py-1.5 text-xs font-medium rounded-md text-slate-400 hover:text-white transition">
+          <i data-lucide="code" class="w-4 h-4 inline mr-1"></i> Code Python / Action
+        </button>
+      </div>
+    </div>
+  </header>
 
-            <!-- Target Summary Quick Cards -->
-            <div class="bg-cardbg p-5 rounded-xl border border-slate-800">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-bullseye text-brand-500"></i> Objectifs d'Achat & Seuil d'Alerte
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs" id="targets-grid">
-                    <!-- Dynamic rendering of targets -->
-                </div>
-            </div>
+  <!-- Content -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
 
-            <!-- Main Feed section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Simulation / Tester Form -->
-                <div class="bg-cardbg p-5 rounded-xl border border-slate-800 space-y-4">
-                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-vial text-amber-400"></i> Tester une annonce en direct
-                    </h3>
-                    <p class="text-xs text-slate-400">Simulez le scraping d'une annonce pour tester l'algorithme d'exclusion et de validation des prix.</p>
-                    
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Titre de l'annonce</label>
-                            <input type="text" id="sim-title" placeholder="Ex: Kit Ryzen 5 5600 + Carte mère B550M + 32Go DDR4" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Prix (€)</label>
-                                <input type="number" id="sim-price" placeholder="180" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Plateforme</label>
-                                <select id="sim-platform" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand-500">
-                                    <option value="Leboncoin">Leboncoin</option>
-                                    <option value="eBay">eBay</option>
-                                    <option value="Vinted">Vinted (High-Tech)</option>
-                                    <option value="Amazon Deals">Amazon (Reconditionné)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="sim-shipping" checked class="rounded border-slate-700 text-brand-500 focus:ring-0 bg-slate-900">
-                            <label for="sim-shipping" class="text-xs text-slate-300">Livraison disponible</label>
-                        </div>
-                        <button onclick="manualSimulate()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-brand-400 border border-brand-500/30 rounded-lg font-medium text-xs flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-filter"></i> Analyser l'Annonce
-                        </button>
-                    </div>
-
-                    <!-- Result Box -->
-                    <div id="sim-result" class="hidden p-3 rounded-lg border text-xs space-y-1">
-                        <!-- Dynamic Result Content -->
-                    </div>
-                </div>
-
-                <!-- Feed of Scraped Ads -->
-                <div class="lg:col-span-2 bg-cardbg p-5 rounded-xl border border-slate-800 flex flex-col h-[520px]">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-stream text-sky-400"></i> Flux d'Annonces & Alertes Tracées
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-slate-400">Filtre:</span>
-                            <select id="feed-filter" onchange="filterFeed()" class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded px-2 py-1 focus:outline-none">
-                                <option value="all">Toutes les annonces</option>
-                                <option value="alert">Alertes & Jackpots uniquement</option>
-                                <option value="excluded">Annonces Exclues (Rejetées)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Stream list -->
-                    <div id="feed-container" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                        <!-- Dynamic Feed Items -->
-                    </div>
-                </div>
-            </div>
-
+    <!-- VUE 1 : DASHBOARD -->
+    <div id="view-dashboard" class="space-y-6">
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Budget Net Ciblé</p>
+            <p class="text-2xl font-bold text-white"><= 400 €</p>
+            <span class="text-[10px] text-slate-500">Achat max 530 € (-175€ revente Z97)</span>
+          </div>
+          <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+          </div>
         </div>
 
-        <!-- TAB 2: RULES CONFIGURATION -->
-        <div id="view-rules" class="hidden space-y-6">
-            <div class="bg-cardbg p-5 rounded-xl border border-slate-800 flex items-center justify-between">
-                <div>
-                    <h2 class="text-base font-bold text-white">Éditeur de Règles & Filtres Bot</h2>
-                    <p class="text-xs text-slate-400">Modifiez la configuration de tracing pour adapter vos prix d'alerte et vos mots-clés d'exclusion.</p>
-                </div>
-                <button onclick="exportConfig()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-brand-400 flex items-center gap-2">
-                    <i class="fa-solid fa-download"></i> Exporter JSON Config
-                </button>
-            </div>
-
-            <!-- Dynamic Category Rules Editor -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="rules-editor-container">
-                <!-- Loaded via JS -->
-            </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Plateformes Tracées</p>
+            <p class="text-2xl font-bold text-sky-400">7 Sites</p>
+            <span class="text-[10px] text-slate-500">Leboncoin, Vinted, Rakuten, Dealabs...</span>
+          </div>
+          <div class="p-3 bg-sky-500/10 text-sky-400 rounded-lg border border-sky-500/20">
+            <i data-lucide="globe" class="w-6 h-6"></i>
+          </div>
         </div>
 
-        <!-- TAB 3: CODE GENERATOR (Python / Supabase Setup) -->
-        <div id="view-code" class="hidden space-y-6">
-            <div class="bg-cardbg p-5 rounded-xl border border-slate-800">
-                <h2 class="text-base font-bold text-white mb-1">Architecture de Déploiement Bot (GitHub + Supabase)</h2>
-                <p class="text-xs text-slate-400 mb-4">Ce code contient l'algorithme complet d'analyse et scraping configurable avec Supabase et notifications Discord/Telegram Webhook.</p>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Alertes en mémoire</p>
+            <p id="stat-alert-count" class="text-2xl font-bold text-amber-400">7 Enchères</p>
+            <span class="text-[10px] text-slate-500">Reset au rafraîchissement</span>
+          </div>
+          <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
+            <i data-lucide="bell" class="w-6 h-6"></i>
+          </div>
+        </div>
 
-                <div class="flex space-x-4 border-b border-slate-800 mb-4">
-                    <button onclick="showCodeSnippet('python')" id="code-tab-python" class="pb-2 border-b-2 border-brand-500 text-xs font-bold text-brand-500">bot_scraper.py (Python/Scrappy)</button>
-                    <button onclick="showCodeSnippet('sql')" id="code-tab-sql" class="pb-2 border-b-2 border-transparent text-xs font-bold text-slate-400">schema_supabase.sql</button>
-                    <button onclick="showCodeSnippet('github')" id="code-tab-github" class="pb-2 border-b-2 border-transparent text-xs font-bold text-slate-400">github_action_workflow.yml</button>
-                </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Jackpots Identifiés</p>
+            <p id="stat-jackpot-count" class="text-2xl font-bold text-emerald-400">3 Trouvés</p>
+            <span class="text-[10px] text-slate-500">Prix sous le seuil prioritaire</span>
+          </div>
+          <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
 
-                <!-- Python Code View -->
-                <div id="code-python" class="relative">
-                    <button onclick="copyCode('python-code-content')" class="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded text-slate-300 border border-slate-700 z-10 flex items-center gap-1.5">
-                        <i class="fa-regular fa-copy"></i> Copier
-                    </button>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-emerald-400 overflow-x-auto max-h-[500px]" id="python-code-content"><code>import os
-import re
-import json
+      <!-- Controls & Search -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap justify-between items-center gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="filterCategory('all')" id="btn-cat-all" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 text-white">Tout (PC & Vinyles)</button>
+          <button onclick="filterCategory('pc')" id="btn-cat-pc" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">🖥️ Upgrade PC 1440p</button>
+          <button onclick="filterCategory('vinyl')" id="btn-cat-vinyl" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">🎵 Vinyles</button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
+            <input type="text" id="feed-search" onkeyup="renderFeed()" placeholder="Filtrer..." class="bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500 w-48 sm:w-64">
+          </div>
+          <button onclick="simulateNewAd()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 transition">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Simuler Annonce
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+        <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+          <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Flux temporaire des affaires trouvées
+          </h2>
+          <span class="text-xs text-slate-500">Rechargement = Remise à zéro</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3">Statut</th>
+                <th class="px-4 py-3">Catégorie</th>
+                <th class="px-4 py-3">Titre de l'annonce</th>
+                <th class="px-4 py-3">Plateforme</th>
+                <th class="px-4 py-3">Prix</th>
+                <th class="px-4 py-3">Seuil Alerte</th>
+                <th class="px-4 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="feed-container" class="divide-y divide-slate-800/60">
+              <!-- Dynamique JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VUE 2 : RÈGLES -->
+    <div id="view-rules" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- PC -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-sky-400 flex items-center gap-2">
+              <i data-lucide="cpu" class="w-5 h-5"></i> Configuration PC 1440p
+            </h3>
+            <span class="text-xs px-2 py-0.5 bg-sky-500/10 text-sky-400 rounded">Budget Max 530 €</span>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>1. Lot Complet (Ryzen 5600 + B550 + 32Go)</span>
+                <span class="text-emerald-400"><= 220 €</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Jackpot: <= 190 € avec RAM | Sans RAM: <= 165 €</p>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>2. Composants individuels (CPU / CM / RAM)</span>
+                <span class="text-amber-400">Paliers</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">CPU R5 5600/X <= 95€ | CM B550/M <= 65€ | 32Go DDR4 <= 55€</p>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>3. GPU (16Go VRAM / RTX 30)</span>
+                <span class="text-emerald-400">235 € - 300 €</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">RX 6800 (275€) | RX 6800 XT (300€) | RTX 3070 (235€) | RTX 3080 (300€)</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-semibold text-rose-400 uppercase tracking-wider mb-2">Exclusions PC</h4>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">HS</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">pour pièces</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">pins tordus</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">5600G</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">A320 / A520</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">SODIMM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vinyles -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-amber-400 flex items-center gap-2">
+              <i data-lucide="disc" class="w-5 h-5"></i> Collection Vinyles (33T / 45T / LP)
+            </h3>
+            <span class="text-xs px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded">Format 33T & 45T</span>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>U2 / Coldplay / Imagine Dragons</span>
+                <span class="text-emerald-400">12 € - 25 €</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">45T: <= 12€ | 33T Occasion: <= 18€ | Neuf: <= 25€</p>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>Dropkick Murphys (Punk Celtique)</span>
+                <span class="text-emerald-400"><= 18 € / <= 25 €</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">The Warrior's Code, Signed and Sealed in Blood...</p>
+            </div>
+
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between font-semibold text-white">
+                <span>Linkin Park (Numb / In The End)</span>
+                <span class="text-emerald-400"><= 15 € / <= 26 €</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">Singles 45T <= 15€ | Meteora / Hybrid Theory <= 22€ (occ)</p>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-xs font-semibold text-rose-400 uppercase tracking-wider mb-2">Exclusions Vinyles</h4>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">CD</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">DVD</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">Blu-ray</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">poster</span>
+              <span class="px-2 py-1 bg-rose-500/10 text-rose-300 text-xs rounded border border-rose-500/20">rayé</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VUE 3 : CODE PYTHON -->
+    <div id="view-code" class="hidden space-y-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-white flex items-center gap-2">
+              <i data-lucide="terminal" class="w-5 h-5 text-sky-400"></i> Script Python Autonome (Discord Bot / Action)
+            </h3>
+            <p class="text-xs text-slate-400">Scrape et envoie directement les alertes sur Discord sans aucune base de données.</p>
+          </div>
+          <button onclick="copyCode()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copier le script
+          </button>
+        </div>
+
+        <pre class="bg-slate-950 p-4 rounded-xl text-xs font-mono text-slate-300 overflow-x-auto border border-slate-800 max-h-[500px]">
+<code id="python-code-block"># bot_tracer.py - Sans base de données (Zero Supabase)
+import os
 import requests
-from supabase import create_client, Client
 
-# CONFIGURATION DE TRACING
-CONFIG = {
-    "exclusions_globales": ["hs", "pour pièces", "défectueux", "pins tordus", "artefact", "boîte vide", "boite vide"],
-    "targets": [
-        {
-            "category": "LOT_COMPLET",
-            "keywords": ["ryzen 5 5600 b550", "ryzen 5 5600x b550", "kit upgrade 5600", "lot ryzen 5600 32go"],
-            "exclusions": ["5600g", "5600gt", "5500", "a320", "a520", "16go"],
-            "prix_max": 220,
-            "prix_jackpot": 190
-        },
-        {
-            "category": "CPU",
-            "keywords": ["ryzen 5 5600", "ryzen 5 5600x", "ryzen 7 5700x", "ryzen 7 5700x3d"],
-            "exclusions": ["5600g", "5600gt", "5500"],
-            "prix_max": 95,
-            "prix_jackpot": 80
-        },
-        {
-            "category": "CARTE_MERE",
-            "keywords": ["b550", "b550m"],
-            "exclusions": ["a320", "a520", "b450"],
-            "prix_max": 65,
-            "prix_jackpot": 50
-        },
-        {
-            "category": "RAM",
-            "keywords": ["32 go ddr4", "32go ddr4", "2x16 go ddr4", "2x16go ddr4"],
-            "exclusions": ["sodimm", "portable", "ecc", "serveur", "ddr3", "ddr5"],
-            "prix_max": 55,
-            "prix_jackpot": 40
-        },
-        {
-            "category": "GPU_AMD",
-            "keywords": ["rx 6800", "rx 6800 xt", "rx 6800xt", "rx 7700 xt"],
-            "exclusions": [],
-            "prix_max": 275, # Modifié selon modèle (RX 6800XT: 300€)
-            "prix_jackpot": 240
-        },
-        {
-            "category": "GPU_NVIDIA",
-            "keywords": ["rtx 3070", "rtx 3070 ti", "rtx 3080"],
-            "exclusions": [],
-            "prix_max": 235, # Modifié selon modèle (RTX 3080: 300€)
-            "prix_jackpot": 210
-        },
-        {
-            "category": "SSD_NVME",
-            "keywords": ["ssd nvme 1to", "ssd m.2 1to", "crucial p3", "samsung 980", "sn570", "sn580"],
-            "exclusions": ["sata", "2.5", "boîtier externe"],
-            "prix_max": 45,
-            "prix_jackpot": 35
-        }
-    ]
-}
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "TON_WEBHOOK_DISCORD_ICI")
 
-# Initialisation Supabase
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
-DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
+RULES = [
+    # PC
+    {"cat": "PC", "keywords": ["ryzen 5 5600 b550", "kit upgrade 5600"], "max_price": 220, "exclude": ["5600g", "a320", "16go"]},
+    {"cat": "PC", "keywords": ["ryzen 5 5600", "ryzen 5 5600x"], "max_price": 95, "exclude": ["5600g", "pins tordus"]},
+    {"cat": "PC", "keywords": ["b550", "b550m"], "max_price": 65, "exclude": ["a320", "a520", "b450"]},
+    {"cat": "PC", "keywords": ["32 go ddr4", "32go ddr4"], "max_price": 55, "exclude": ["sodimm", "ecc"]},
+    {"cat": "PC", "keywords": ["rx 6800"], "max_price": 275, "exclude": ["hs"]},
+    {"cat": "PC", "keywords": ["rx 6800 xt", "rx 6800xt"], "max_price": 300, "exclude": ["hs"]},
+    {"cat": "PC", "keywords": ["rtx 3070"], "max_price": 235, "exclude": ["hs"]},
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL else None
+    # VINYL
+    {"cat": "VINYL", "keywords": ["vinyle u2", "vinyl u2", "joshua tree"], "max_price": 18, "exclude": ["cd", "dvd", "rayé"]},
+    {"cat": "VINYL", "keywords": ["vinyle imagine dragons"], "max_price": 18, "exclude": ["cd", "dvd"]},
+    {"cat": "VINYL", "keywords": ["vinyle coldplay"], "max_price": 18, "exclude": ["cd"]},
+    {"cat": "VINYL", "keywords": ["vinyle dropkick murphys"], "max_price": 18, "exclude": ["cd"]},
+    {"cat": "VINYL", "keywords": ["vinyle meteora", "vinyle hybrid theory", "vinyle numb"], "max_price": 22, "exclude": ["cd"]}
+]
 
-def evaluate_ad(title, price, shipping_available=True):
-    title_lower = title.lower()
-    
-    # Check exclusions globales
-    for excl in CONFIG["exclusions_globales"]:
-        if excl in title_lower:
-            return {"status": "EXCLUDED", "reason": f"Exclusion globale: '{excl}'"}
-            
-    if not shipping_available:
-        return {"status": "EXCLUDED", "reason": "Livraison non disponible"}
-
-    # Test contre chaque target
-    for target in CONFIG["targets"]:
-        kw_match = any(kw in title_lower for kw in target["keywords"])
-        if kw_match:
-            # Check exclusions spécifiques
-            excl_match = any(excl in title_lower for excl in target["exclusions"])
-            if excl_match:
-                continue # Passer à une autre catégorie si exclus
-                
-            if price <= target["prix_jackpot"]:
-                return {"status": "JACKPOT", "target": target["category"], "price": price, "max": target["prix_max"]}
-            elif price <= target["prix_max"]:
-                return {"status": "ALERT", "target": target["category"], "price": price, "max": target["prix_max"]}
-            else:
-                return {"status": "TOO_EXPENSIVE", "reason": f"Prix {price}€ > Max {target['prix_max']}€"}
-
-    return {"status": "NO_MATCH", "reason": "Aucun mot-clé valide identifié"}
-
-def notify_discord(ad, result):
-    if not DISCORD_WEBHOOK_URL:
-        return
-    color = 0xf59e0b if result["status"] == "JACKPOT" else 0x10b981
+def send_discord_alert(title, price, url, source):
     payload = {
         "embeds": [{
-            "title": f"🚨 PRIX {result['status']} : {ad['title']}",
-            "description": f"**Prix :** {ad['price']} € (Max: {result['max']} €)\n**Catégorie :** {result['target']}\n**Plateforme :** {ad['platform']}",
-            "url": ad.get("url", "#"),
-            "color": color
+            "title": f"🚨 NOUVELLE AFFAIRE : {title}",
+            "description": f"**Prix :** {price} €\n**Plateforme :** {source}\n[Ouvrir l'annonce]({url})",
+            "color": 3447003
         }]
     }
     requests.post(DISCORD_WEBHOOK_URL, json=payload)
 
-# Exemple d'exécution
+def filter_ad(title, price):
+    title_lower = title.lower()
+    for rule in RULES:
+        if any(kw in title_lower for kw in rule["keywords"]):
+            if price <= rule["max_price"]:
+                if not any(ex in title_lower for ex in rule["exclude"]):
+                    return True
+    return False
+
 if __name__ == "__main__":
-    test_ad = {"title": "Lot Kit Ryzen 5 5600 + B550M + 32Go DDR4 Corsair", "price": 185, "platform": "Leboncoin"}
-    res = evaluate_ad(test_ad["title"], test_ad["price"])
-    print("Résultat du test :", res)
-    if res["status"] in ["ALERT", "JACKPOT"]:
-        print("-> Notification envoyée !")
-</code></pre>
-                </div>
+    print("Bot démarré...")
+</code>
+        </pre>
+      </div>
+    </div>
 
-                <!-- SQL View -->
-                <div id="code-sql" class="relative hidden">
-                    <button onclick="copyCode('sql-code-content')" class="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded text-slate-300 border border-slate-700 z-10 flex items-center gap-1.5">
-                        <i class="fa-regular fa-copy"></i> Copier
-                    </button>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-sky-400 overflow-x-auto max-h-[500px]" id="sql-code-content"><code>-- Table de stockage des annonces repérées (Supabase SQL Schema)
-CREATE TABLE IF NOT EXISTS public.traced_deals (
-    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    title TEXT NOT NULL,
-    price NUMERIC NOT NULL,
-    category TEXT NOT NULL,
-    status TEXT NOT NULL, -- 'ALERT', 'JACKPOT', 'REJECTED'
-    url TEXT UNIQUE,
-    platform TEXT,
-    is_shippable BOOLEAN DEFAULT true
-);
+  </main>
 
--- Index pour recherche rapide et déduplication
-CREATE INDEX IF NOT EXISTS idx_traced_deals_url ON public.traced_deals(url);
-CREATE INDEX IF NOT EXISTS idx_traced_deals_status ON public.traced_deals(status);
-</code></pre>
-                </div>
+  <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
+    <p>DealScanner Pro — 100% Client-Side. Zéro stockage externe.</p>
+  </footer>
 
-                <!-- GitHub Action View -->
-                <div id="code-github" class="relative hidden">
-                    <button onclick="copyCode('github-code-content')" class="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded text-slate-300 border border-slate-700 z-10 flex items-center gap-1.5">
-                        <i class="fa-regular fa-copy"></i> Copier
-                    </button>
-                    <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-amber-300 overflow-x-auto max-h-[500px]" id="github-code-content"><code>name: PC Parts Scraper Bot
+  <script>
+    lucide.createIcons();
 
-on:
-  schedule:
-    # Exécution toutes les 15 minutes
-    - cron: '*/15 * * * *'
-  workflow_dispatch: # Lancement manuel possible
+    // Données initiales en mémoire (remises à zéro à chaque F5 / reload)
+    function getInitialData() {
+      return [
+        { id: 1, cat: 'pc', title: 'Kit Lot Ryzen 5 5600 + Carte Mère MSI B550M PRO + 32Go DDR4', price: 185, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true },
+        { id: 2, cat: 'pc', title: 'Carte Graphique Sapphire RX 6800 16Go Pulse', price: 260, maxPrice: 275, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false },
+        { id: 3, cat: 'vinyl', title: 'Vinyle U2 - The Joshua Tree 33T Original', price: 14, maxPrice: 18, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: true },
+        { id: 4, cat: 'pc', title: 'Ryzen 5 5600X Box (sans ventirad)', price: 85, maxPrice: 95, platform: 'Rakuten', link: 'https://rakuten.com', isJackpot: false },
+        { id: 5, cat: 'vinyl', title: 'Linkin Park - Meteora Vinyle Album 2LP', price: 21, maxPrice: 22, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false },
+        { id: 6, cat: 'pc', title: 'Nvidia Gigabyte RTX 3070 Gaming OC 8Go', price: 220, maxPrice: 235, platform: 'Dealabs', link: 'https://dealabs.com', isJackpot: true },
+        { id: 7, cat: 'vinyl', title: 'Dropkick Murphys - Signed and Sealed in Blood Vinyl', price: 16, maxPrice: 18, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: false }
+      ];
+    }
 
-jobs:
-  scrape-and-trace:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    let feedData = getInitialData();
+    let currentCat = 'all';
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    function renderFeed() {
+      const container = document.getElementById('feed-container');
+      const search = document.getElementById('feed-search').value.toLowerCase();
+      container.innerHTML = '';
 
-      - name: Install Dependencies
-        run: |
-          pip install requests supabase beautifulsoup4
+      const filtered = feedData.filter(item => {
+        const matchesCat = currentCat === 'all' || item.cat === currentCat;
+        const matchesSearch = item.title.toLowerCase().includes(search) || item.platform.toLowerCase().includes(search);
+        return matchesCat && matchesSearch;
+      });
 
-      - name: Run Bot Tracker Script
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python bot_scraper.py
-</code></pre>
-                </div>
-            </div>
-        </div>
+      let jackpotCount = 0;
+      filtered.forEach(item => {
+        if (item.isJackpot) jackpotCount++;
 
-    </main>
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-cardbg py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <div>PC Upgrade Tracing Bot &bull; Configuration 1440p (Ryzen 5000 / RTX 3000 / RX 6000)</div>
-            <div class="flex items-center space-x-4">
-                <span class="text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle text-[8px]"></i> Ready for GitHub & Supabase</span>
-            </div>
-        </div>
-    </footer>
+        const badgeStatut = item.isJackpot 
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 w-max"><i data-lucide="zap" class="w-3 h-3"></i> JACKPOT</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center gap-1 w-max"><i data-lucide="check" class="w-3 h-3"></i> ALERTE</span>`;
 
-    <!-- JavaScript Application Logic -->
-    <script>
-        // Data Structure corresponding to prompt spec
-        let tracingConfig = {
-            budgetMax: 530,
-            exclusionsGlobales: ["HS", "pour pièces", "défectueux", "pins tordus", "artefact", "boîte vide"],
-            targets: [
-                {
-                    id: "lot_complet",
-                    name: "1. Lot Complet (CPU + CM + RAM 32G)",
-                    keywords: ["ryzen 5 5600 b550", "ryzen 5 5600x b550", "kit upgrade 5600", "lot ryzen 5600 32go"],
-                    exclusions: ["5600G", "5600GT", "5500", "A320", "A520", "16Go"],
-                    priceAlert: 220,
-                    priceJackpot: 190,
-                    badge: "Prioritaire"
-                },
-                {
-                    id: "cpu",
-                    name: "2.1 Processeur (Solo)",
-                    keywords: ["Ryzen 5 5600", "Ryzen 5 5600X", "Ryzen 7 5700X", "Ryzen 7 5700X3D"],
-                    exclusions: ["5600G", "5600GT", "5500", "pins tordus"],
-                    priceAlert: 95,
-                    priceJackpot: 80,
-                    badge: "Option Pièce"
-                },
-                {
-                    id: "mb",
-                    name: "2.2 Carte Mère (B550 / B550M)",
-                    keywords: ["B550", "B550M"],
-                    exclusions: ["A320", "A520", "B450", "pins tordus"],
-                    priceAlert: 65,
-                    priceJackpot: 50,
-                    badge: "Option Pièce"
-                },
-                {
-                    id: "ram",
-                    name: "2.3 Mémoire RAM (32 Go DDR4)",
-                    keywords: ["32 Go DDR4", "32Go DDR4", "2x16 Go DDR4", "2x16Go DDR4"],
-                    exclusions: ["SODIMM", "portable", "ECC", "serveur", "DDR3", "DDR5"],
-                    priceAlert: 55,
-                    priceJackpot: 40,
-                    badge: "Option Pièce"
-                },
-                {
-                    id: "gpu_amd",
-                    name: "3.1 GPU AMD (16 Go VRAM)",
-                    keywords: ["RX 6800", "RX 6800 XT", "RX 6800XT", "RX 7700 XT"],
-                    exclusions: ["HS", "artefact"],
-                    priceAlert: 275, // Average alert (6800: 275€, 6800XT: 300€)
-                    priceJackpot: 240,
-                    badge: "Recommandé Realm"
-                },
-                {
-                    id: "gpu_nv",
-                    name: "3.2 GPU Nvidia (8-10 Go VRAM)",
-                    keywords: ["RTX 3070", "RTX 3070 Ti", "RTX 3080"],
-                    exclusions: ["HS", "artefact"],
-                    priceAlert: 235, // Average (3070: 235€, 3080: 300€)
-                    priceJackpot: 210,
-                    badge: "Alternative"
-                },
-                {
-                    id: "ssd",
-                    name: "4. Bonus : SSD NVMe M.2 1To",
-                    keywords: ["SSD NVMe 1To", "SSD M.2 1To", "Crucial P3", "Samsung 980", "SN570", "SN580"],
-                    exclusions: ["SATA", "2.5", "boîtier externe"],
-                    priceAlert: 45,
-                    priceJackpot: 35,
-                    badge: "Optionnel"
-                }
-            ]
-        };
+        const catBadge = item.cat === 'pc'
+          ? `<span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">🖥️ PC</span>`
+          : `<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">🎵 Vinyle</span>`;
 
-        // Scraped ads mock feed
-        let feedData = [
-            { id: 1, title: "Kit Evolution Ryzen 5 5600 + CM Gigabyte B550M + 32Go DDR4 3600MHz", price: 185, platform: "Leboncoin", date: "Il y a 4 min", shippable: true },
-            { id: 2, title: "Carte Graphique Sapphire Pulse AMD Radeon RX 6800 16GB", price: 260, platform: "Leboncoin", date: "Il y a 12 min", shippable: true },
-            { id: 3, title: "AMD Ryzen 5 5600G avec Ventirad d'origine", price: 85, platform: "eBay", date: "Il y a 18 min", shippable: true },
-            { id: 4, title: "Carte Mère ASUS TUF GAMING B550-PLUS (Pins tordus à redresser)", price: 40, platform: "Leboncoin", date: "Il y a 25 min", shippable: true },
-            { id: 5, title: "RAM Corsair Vengeance LPX 32Go (2x16Go) DDR4 3200MHz", price: 48, platform: "Leboncoin", date: "Il y a 30 min", shippable: true },
-            { id: 6, title: "Nvidia RTX 3070 Founders Edition 8GB", price: 230, platform: "Vinted", date: "Il y a 45 min", shippable: true },
-            { id: 7, title: "SSD NVMe M.2 Crucial P3 Plus 1To Neuf Scellé", price: 42, platform: "Leboncoin", date: "Il y a 1 heure", shippable: true }
-        ];
+        tr.innerHTML = `
+          <td class="px-4 py-3">${badgeStatut}</td>
+          <td class="px-4 py-3">${catBadge}</td>
+          <td class="px-4 py-3 font-medium text-white max-w-xs truncate">${item.title}</td>
+          <td class="px-4 py-3 text-slate-400">${item.platform}</td>
+          <td class="px-4 py-3 font-bold text-emerald-400 text-sm">${item.price} €</td>
+          <td class="px-4 py-3 text-slate-500 text-[11px]">Seuil <= ${item.maxPrice} €</td>
+          <td class="px-4 py-3 text-right">
+            <a href="${item.link}" target="_blank" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-sky-600 text-slate-200 hover:text-white rounded border border-slate-700 transition inline-flex items-center gap-1">
+              Voir <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </td>
+        `;
+        container.appendChild(tr);
+      });
 
-        let simInterval = null;
+      document.getElementById('stat-alert-count').innerText = `${filtered.length} Enchères`;
+      document.getElementById('stat-jackpot-count').innerText = `${jackpotCount} Trouvés`;
+      lucide.createIcons();
+    }
 
-        // Init App
-        window.onload = function() {
-            renderTargetCards();
-            renderRulesEditor();
-            processAndRenderFeed();
+    function filterCategory(cat) {
+      currentCat = cat;
+      ['all', 'pc', 'vinyl'].forEach(c => {
+        const btn = document.getElementById(`btn-cat-${c}`);
+        if (c === cat) {
+          btn.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 text-white';
+        } else {
+          btn.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700';
         }
+      });
+      renderFeed();
+    }
 
-        // Render Quick Target Cards
-        function renderTargetCards() {
-            const container = document.getElementById('targets-grid');
-            container.innerHTML = tracingConfig.targets.map(t => `
-                <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold text-slate-200 truncate" title="${t.name}">${t.name}</span>
-                            <span class="text-[10px] bg-slate-800 text-brand-400 border border-brand-500/30 px-1.5 py-0.5 rounded">${t.badge}</span>
-                        </div>
-                        <div class="text-[11px] text-slate-400 truncate">Mots-clés: ${t.keywords.slice(0, 2).join(', ')}...</div>
-                    </div>
-                    <div class="mt-3 flex items-center justify-between pt-2 border-t border-slate-800/60">
-                        <span class="text-slate-400">Alerte: <b class="text-emerald-400">&le; ${t.priceAlert}€</b></span>
-                        <span class="text-amber-400 font-medium">Jackpot: &le; ${t.priceJackpot}€</span>
-                    </div>
-                </div>
-            `).join('');
+    function switchTab(tab) {
+      ['dashboard', 'rules', 'code'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          view.classList.remove('hidden');
+          btn.className = 'px-3 py-1.5 text-xs font-medium rounded-md bg-sky-600 text-white shadow transition';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'px-3 py-1.5 text-xs font-medium rounded-md text-slate-400 hover:text-white transition';
         }
+      });
+    }
 
-        // Evaluation Logic for an ad
-        function evaluateAd(ad) {
-            const titleLower = ad.title.toLowerCase();
+    function simulateNewAd() {
+      const sampleAds = [
+        { id: Date.now(), cat: 'pc', title: 'Lot Ryzen 5 5600 + B550M ASRock Steel Legend + 32GB', price: 190, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true },
+        { id: Date.now(), cat: 'vinyl', title: 'Vinyle Coldplay - Parachutes Original 33T', price: 15, maxPrice: 18, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: true },
+        { id: Date.now(), cat: 'pc', title: 'MSI Radeon RX 6800 XT Gaming X Trio 16Go', price: 295, maxPrice: 300, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false }
+      ];
+      const randomAd = sampleAds[Math.floor(Math.random() * sampleAds.length)];
+      feedData.unshift(randomAd);
+      renderFeed();
+    }
 
-            // 1. Exclusions Globales
-            for (let excl of tracingConfig.exclusionsGlobales) {
-                if (titleLower.includes(excl.toLowerCase())) {
-                    return { status: "EXCLUDED", reason: `Exclusion globale: "${excl}"`, color: "border-red-500/40 bg-red-950/10 text-red-400" };
-                }
-            }
+    function copyCode() {
+      const codeText = document.getElementById('python-code-block').innerText;
+      navigator.clipboard.writeText(codeText);
+      alert('Code Python copié !');
+    }
 
-            if (!ad.shippable) {
-                return { status: "EXCLUDED", reason: "Livraison non disponible", color: "border-red-500/40 bg-red-950/10 text-red-400" };
-            }
-
-            // 2. Matching Target
-            for (let target of tracingConfig.targets) {
-                const hasKeyword = target.keywords.some(kw => titleLower.includes(kw.toLowerCase()));
-                if (hasKeyword) {
-                    // Check Target Exclusions
-                    const hasExclusion = target.exclusions.some(excl => titleLower.includes(excl.toLowerCase()));
-                    if (hasExclusion) {
-                        return { status: "EXCLUDED", reason: `Exclusion specifique "${target.name}": mot-clé filtre décelé`, color: "border-red-500/40 bg-red-950/10 text-red-400" };
-                    }
-
-                    // Price check
-                    if (ad.price <= target.priceJackpot) {
-                        return { status: "JACKPOT", targetName: target.name, diff: target.priceAlert - ad.price, color: "border-amber-500/60 bg-amber-950/20 text-amber-300", badgeClass: "bg-amber-500 text-slate-950" };
-                    } else if (ad.price <= target.priceAlert) {
-                        return { status: "ALERT", targetName: target.name, diff: target.priceAlert - ad.price, color: "border-emerald-500/60 bg-emerald-950/20 text-emerald-300", badgeClass: "bg-emerald-500 text-slate-950" };
-                    } else {
-                        return { status: "TOO_EXPENSIVE", reason: `Prix (${ad.price}€) > Alerte (${target.priceAlert}€)`, color: "border-slate-800 bg-slate-900/40 text-slate-400" };
-                    }
-                }
-            }
-
-            return { status: "NO_MATCH", reason: "Aucun mot-clé cible trouvé", color: "border-slate-800 bg-slate-900/40 text-slate-500" };
-        }
-
-        // Render Feed
-        function processAndRenderFeed() {
-            const filter = document.getElementById('feed-filter').value;
-            const container = document.getElementById('feed-container');
-
-            let alertCounter = 0;
-            let jackpotCounter = 0;
-
-            let html = '';
-
-            feedData.forEach(ad => {
-                const res = evaluateAd(ad);
-
-                if (res.status === 'ALERT') alertCounter++;
-                if (res.status === 'JACKPOT') { alertCounter++; jackpotCounter++; }
-
-                // Filter check
-                if (filter === 'alert' && !(res.status === 'ALERT' || res.status === 'JACKPOT')) return;
-                if (filter === 'excluded' && res.status !== 'EXCLUDED') return;
-
-                let statusBadge = '';
-                if (res.status === 'JACKPOT') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-950 flex items-center gap-1"><i class="fa-solid fa-fire"></i> JACKPOT (-${res.diff}€)</span>`;
-                } else if (res.status === 'ALERT') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-400 text-slate-950 flex items-center gap-1"><i class="fa-solid fa-bell"></i> ALERTE PRIX</span>`;
-                } else if (res.status === 'EXCLUDED') {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-red-900/60 text-red-300 border border-red-700/50">EXCLU</span>`;
-                } else {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">PAS DE MATCH</span>`;
-                }
-
-                html += `
-                    <div class="p-3 rounded-lg border ${res.color} flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-slate-700">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                ${statusBadge}
-                                <span class="text-xs font-semibold text-slate-200">${ad.title}</span>
-                            </div>
-                            <div class="text-[11px] text-slate-400 flex items-center gap-3">
-                                <span><i class="fa-solid fa-store text-slate-500"></i> ${ad.platform}</span>
-                                <span><i class="fa-solid fa-clock text-slate-500"></i> ${ad.date}</span>
-                                <span><i class="fa-solid fa-truck text-emerald-400"></i> Livraison OK</span>
-                                ${res.reason ? `<span class="text-red-400 font-mono">(${res.reason})</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
-                            <div class="text-right">
-                                <div class="text-base font-bold text-white">${ad.price} €</div>
-                            </div>
-                            <button onclick="copyAdUrl('${ad.title}')" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs border border-slate-700 transition" title="Copier le lien">
-                                <i class="fa-solid fa-external-link"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html || '<div class="text-center py-8 text-xs text-slate-500">Aucune annonce ne correspond aux critères filtrés.</div>';
-            document.getElementById('alert-count').innerText = alertCounter;
-            document.getElementById('jackpot-count').innerText = jackpotCounter;
-        }
-
-        function filterFeed() {
-            processAndRenderFeed();
-        }
-
-        // Manual Single Ad Tester
-        function manualSimulate() {
-            const title = document.getElementById('sim-title').value.trim();
-            const price = parseFloat(document.getElementById('sim-price').value);
-            const platform = document.getElementById('sim-platform').value;
-            const shippable = document.getElementById('sim-shipping').checked;
-            const resBox = document.getElementById('sim-result');
-
-            if (!title || isNaN(price)) {
-                resBox.classList.remove('hidden');
-                resBox.className = "p-3 rounded-lg border border-red-500/50 bg-red-950/20 text-xs text-red-300";
-                resBox.innerText = "Veuillez entrer un titre et un prix valide.";
-                return;
-            }
-
-            const testAd = { title, price, platform, shippable, date: "À l'instant" };
-            const evalRes = evaluateAd(testAd);
-
-            resBox.classList.remove('hidden');
-            if (evalRes.status === 'JACKPOT' || evalRes.status === 'ALERT') {
-                resBox.className = `p-3 rounded-lg border ${evalRes.color} text-xs space-y-1`;
-                resBox.innerHTML = `
-                    <div class="font-bold flex items-center gap-1.5">
-                        <i class="fa-solid fa-check-circle text-emerald-400"></i> ANNONCE VALIDÉE (${evalRes.status})
-                    </div>
-                    <div>Catégorie identifiée: <b>${evalRes.targetName}</b></div>
-                    <div>Prix proposé: <b>${price} €</b> (Seuil d'Alerte: ${price <= evalRes.diff ? 'Jackpot' : 'Conforme'})</div>
-                `;
-                // Add to feed
-                feedData.unshift(testAd);
-                processAndRenderFeed();
-            } else {
-                resBox.className = `p-3 rounded-lg border ${evalRes.color} text-xs space-y-1`;
-                resBox.innerHTML = `
-                    <div class="font-bold flex items-center gap-1.5">
-                        <i class="fa-solid fa-times-circle text-red-400"></i> ANNONCE REJETÉE
-                    </div>
-                    <div>Raison: <span class="font-mono text-slate-300">${evalRes.reason}</span></div>
-                `;
-            }
-        }
-
-        // Live Simulation Toggle
-        function toggleSimulation() {
-            const btnText = document.getElementById('sim-btn-text');
-            const ping = document.getElementById('sim-ping');
-
-            if (simInterval) {
-                clearInterval(simInterval);
-                simInterval = null;
-                btnText.innerText = "Lancer Simulation Webhook";
-                ping.classList.remove('animate-ping');
-            } else {
-                btnText.innerText = "Arrêter la Simulation";
-                ping.classList.add('animate-ping');
-                simInterval = setInterval(() => {
-                    generateRandomMockAd();
-                }, 3500);
-            }
-        }
-
-        function generateRandomMockAd() {
-            const mockTitles = [
-                { title: "Ryzen 5 5600X Boite jamais servi", price: 89, platform: "Leboncoin" },
-                { title: "Kit Upgrade AMD Ryzen 5 5600 + Carte mère MSI B550M PRO-VDH", price: 155, platform: "Leboncoin" },
-                { title: "ASUS Dual GeForce RTX 3070 8GB OC Edition", price: 220, platform: "eBay" },
-                { title: "Carte Graphique RX 6800 16Go Sapphire RX6800", price: 265, platform: "Leboncoin" },
-                { title: "Ryzen 5 5500 + Ventirad", price: 50, platform: "Vinted" },
-                { title: "Lot Ryzen 5 5600G avec A320M et 16Go RAM (Pour pièces / HS)", price: 110, platform: "Leboncoin" }
-            ];
-
-            const randomAd = mockTitles[Math.floor(Math.random() * mockTitles.length)];
-            randomAd.id = Date.now();
-            randomAd.date = "À l'instant";
-            randomAd.shippable = true;
-
-            feedData.unshift(randomAd);
-            if (feedData.length > 20) feedData.pop();
-            processAndRenderFeed();
-        }
-
-        // Tab Switching
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-brand-500', 'text-brand-500');
-                btn.classList.add('border-transparent', 'text-slate-400');
-            });
-            document.getElementById(`tab-${tabId}`).classList.add('border-brand-500', 'text-brand-500');
-
-            ['dashboard', 'rules', 'code'].forEach(view => {
-                document.getElementById(`view-${view}`).classList.add('hidden');
-            });
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-        }
-
-        // Render Rules Editor Code
-        function renderRulesEditor() {
-            const container = document.getElementById('rules-editor-container');
-            container.innerHTML = tracingConfig.targets.map((t, idx) => `
-                <div class="bg-cardbg p-4 rounded-xl border border-slate-800 space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                        <span class="text-xs font-bold text-slate-200">${t.name}</span>
-                        <span class="text-[10px] bg-brand-950 text-brand-400 border border-brand-800 px-2 py-0.5 rounded-full">${t.badge}</span>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Mots-clés inclus (séparés par virgule)</label>
-                        <input type="text" value="${t.keywords.join(', ')}" onchange="updateRuleKeywords(${idx}, this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Exclusions spécifiques</label>
-                        <input type="text" value="${t.exclusions.join(', ')}" onchange="updateRuleExclusions(${idx}, this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Prix Alerte Max (€)</label>
-                            <input type="number" value="${t.priceAlert}" onchange="updateRulePrice(${idx}, 'alert', this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] text-slate-400 mb-1">Prix Jackpot (€)</label>
-                            <input type="number" value="${t.priceJackpot}" onchange="updateRulePrice(${idx}, 'jackpot', this.value)" class="w-full bg-slate-900 border border-slate-700 text-xs rounded px-2.5 py-1.5 text-slate-200">
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateRuleKeywords(idx, val) {
-            tracingConfig.targets[idx].keywords = val.split(',').map(s => s.trim()).filter(Boolean);
-            renderTargetCards();
-            processAndRenderFeed();
-        }
-
-        function updateRuleExclusions(idx, val) {
-            tracingConfig.targets[idx].exclusions = val.split(',').map(s => s.trim()).filter(Boolean);
-            processAndRenderFeed();
-        }
-
-        function updateRulePrice(idx, type, val) {
-            const num = parseFloat(val);
-            if (type === 'alert') tracingConfig.targets[idx].priceAlert = num;
-            if (type === 'jackpot') tracingConfig.targets[idx].priceJackpot = num;
-            renderTargetCards();
-            processAndRenderFeed();
-        }
-
-        // Code Snippet Switcher
-        function showCodeSnippet(lang) {
-            ['python', 'sql', 'github'].forEach(l => {
-                document.getElementById(`code-${l}`).classList.add('hidden');
-                document.getElementById(`code-tab-${l}`).classList.remove('border-brand-500', 'text-brand-500');
-                document.getElementById(`code-tab-${l}`).classList.add('border-transparent', 'text-slate-400');
-            });
-            document.getElementById(`code-${lang}`).classList.remove('hidden');
-            document.getElementById(`code-tab-${lang}`).classList.add('border-brand-500', 'text-brand-500');
-        }
-
-        function copyCode(id) {
-            const codeText = document.getElementById(id).innerText;
-            const textarea = document.createElement('textarea');
-            textarea.value = codeText;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert("Code copié dans le presse-papier !");
-        }
-
-        function copyAdUrl(title) {
-            const textarea = document.createElement('textarea');
-            textarea.value = `https://www.leboncoin.fr/recherche?text=${encodeURIComponent(title)}`;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert(`Lien de recherche copié pour "${title}"`);
-        }
-
-        function exportConfig() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tracingConfig, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "pc_tracing_config.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-    </script>
+    renderFeed();
+  </script>
 </body>
 </html>
