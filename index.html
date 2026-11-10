@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DealScanner Pro — Live 10s & Favoris</title>
+  <title>DealScanner Pro — Live GitHub Results</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -33,15 +33,15 @@
         <div>
           <h1 class="text-lg font-bold text-white flex items-center gap-2">
             DealScanner Pro
-            <span class="text-xs font-mono px-2 py-0.5 bg-sky-500/20 text-sky-300 rounded border border-sky-500/30">Live 10s + Favoris</span>
+            <span class="text-xs font-mono px-2 py-0.5 bg-sky-500/20 text-sky-300 rounded border border-sky-500/30">Live JSON</span>
           </h1>
-          <p class="text-xs text-slate-400">Monitoring multi-catégories & auto-refresh</p>
+          <p class="text-xs text-slate-400">Flux connecté à results.json</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <button onclick="manualReload()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow">
-          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Reload (10s)
+        <button onclick="loadData()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition shadow">
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Recharger
         </button>
       </div>
     </div>
@@ -67,7 +67,7 @@
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-2.5 text-slate-500"></i>
         <input type="text" id="feed-search" onkeyup="renderFeed()" placeholder="Rechercher dans les annonces..." class="bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500 w-full">
       </div>
-      <span id="refresh-timer" class="text-[11px] text-slate-500 font-mono">Prochain scan auto dans 10s</span>
+      <span id="refresh-timer" class="text-[11px] text-slate-500 font-mono">Actualisation auto toutes les 10s</span>
     </div>
 
     <!-- Table des annonces -->
@@ -75,7 +75,7 @@
       <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
         <h2 class="text-sm font-semibold text-white flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Flux en direct
+          Flux en direct de GitHub
         </h2>
         <span id="active-count" class="text-xs text-slate-400">0 annonces affichées</span>
       </div>
@@ -95,7 +95,7 @@
             </tr>
           </thead>
           <tbody id="feed-container" class="divide-y divide-slate-800/60">
-            <!-- Dynamique JS -->
+            <!-- Chargé dynamiquement depuis results.json -->
           </tbody>
         </table>
       </div>
@@ -104,24 +104,32 @@
   </main>
 
   <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-xs text-slate-500">
-    <p>DealScanner Pro — Auto-refresh 10s actif</p>
+    <p>DealScanner Pro — Lecture directe de results.json</p>
   </footer>
 
   <script>
-    lucide.createIcons();
-
-    let feedData = [
-      { id: 1, cat: 'pc', title: 'Kit evolution Ryzen 5 5600 + CM B550M + 32 Go DDR4 3600 MHz', price: 185, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true, tag: 'LOT 32GO', isFav: false },
-      { id: 2, cat: 'new_add', title: 'Lot i5 12400F + Carte Mère B660M DDR4 + 32Go Corsair', price: 195, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true, tag: 'LOT INTEL', isFav: false },
-      { id: 3, cat: 'new_add', title: 'Gigabyte Radeon RX 6750 XT Gaming OC 12Go', price: 225, maxPrice: 230, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false, tag: 'RX 6750 XT', isFav: false },
-      { id: 4, cat: 'pc', title: 'RAM Corsair Vengeance LPX 32Go (2x16Go) DDR4 3200MHz', price: 48, maxPrice: 55, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: true, tag: 'RAM 32GO', isFav: true },
-      { id: 5, cat: 'vinyl', title: 'Vinyle U2 - The Joshua Tree 33T Original', price: 14, maxPrice: 18, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: true, tag: 'VINYLE U2', isFav: false },
-      { id: 6, cat: 'new_add', title: 'Processeur AMD Ryzen 7 5700X Box', price: 99, maxPrice: 105, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false, tag: 'CPU 8C', isFav: false },
-      { id: 7, cat: 'vinyl', title: 'Linkin Park - Meteora Vinyle Album 2LP', price: 21, maxPrice: 22, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: false, tag: 'VINYLE LP', isFav: false }
-    ];
-
+    let feedData = [];
     let currentCategory = 'all';
-    let countdown = 10;
+
+    async function loadData() {
+      try {
+        // Ajout d'un paramètre aléatoire (?t=...) pour éviter que le navigateur ne mette le JSON en cache
+        const response = await fetch('results.json?t=' + new Date().getTime());
+        if (response.ok) {
+          const data = await response.json();
+          // Conserver l'état des favoris si déjà cochés
+          feedData = data.map(newItem => {
+            const existing = feedData.find(old => old.id === newItem.id);
+            return existing ? { ...newItem, isFav: existing.isFav } : newItem;
+          });
+          renderFeed();
+        } else {
+          console.log("results.json introuvable pour l'instant (le bot va le créer au premier scan).");
+        }
+      } catch (error) {
+        console.error("Erreur de chargement du flux:", error);
+      }
+    }
 
     function renderFeed() {
       const container = document.getElementById('feed-container');
@@ -137,11 +145,16 @@
       document.getElementById('active-count').innerText = `${filtered.length} annonces affichées`;
       document.getElementById('fav-counter').innerText = feedData.filter(i => i.isFav).length;
 
+      if (filtered.length === 0) {
+        container.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Aucune annonce trouvée pour l'instant. Le bot remettra le fichier à jour au prochain scan.</td></tr>`;
+        return;
+      }
+
       filtered.forEach(item => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/40';
 
-        const favBtn = `<button onclick="toggleFav(${item.id})" class="text-slate-500 hover:text-amber-400 transition"><i data-lucide="star" class="w-4 h-4 ${item.isFav ? 'fill-amber-400 text-amber-400' : ''}"></i></button>`;
+        const favBtn = `<button onclick="toggleFav('${item.id}')" class="text-slate-500 hover:text-amber-400 transition"><i data-lucide="star" class="w-4 h-4 ${item.isFav ? 'fill-amber-400 text-amber-400' : ''}"></i></button>`;
         const badgeStatut = item.isJackpot 
           ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">JACKPOT</span>`
           : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">ALERTE</span>`;
@@ -189,40 +202,18 @@
     }
 
     function toggleFav(id) {
-      const item = feedData.find(i => i.id === id);
+      const item = feedData.find(i => i.id == id);
       if (item) {
         item.isFav = !item.isFav;
         renderFeed();
       }
     }
 
-    function manualReload() {
-      countdown = 10;
-      simulateNewAd();
-    }
+    // Chargement initial au démarrage de la page
+    loadData();
 
-    function simulateNewAd() {
-      const pool = [
-        { id: Date.now(), cat: 'pc', title: 'Combo Ryzen 5 5600 + B550 Asus TUF + 32Go DDR4', price: 189, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true, tag: 'LOT 32GO', isFav: false },
-        { id: Date.now(), cat: 'new_add', title: 'Lot i5 12600KF + ASUS B660M + 32Go RAM', price: 210, maxPrice: 220, platform: 'Leboncoin', link: 'https://leboncoin.fr', isJackpot: true, tag: 'LOT INTEL', isFav: false },
-        { id: Date.now(), cat: 'new_add', title: 'Nvidia RTX 3060 Ti Founders Edition', price: 185, maxPrice: 200, platform: 'Rakuten', link: 'https://rakuten.com', isJackpot: true, tag: 'RTX 3060Ti', isFav: false },
-        { id: Date.now(), cat: 'vinyl', title: 'Vinyle Coldplay - Parachutes Original 33T', price: 15, maxPrice: 18, platform: 'Vinted', link: 'https://vinted.fr', isJackpot: true, tag: 'VINYLE COLDPLAY', isFav: false }
-      ];
-      const randomItem = pool[Math.floor(Math.random() * pool.length)];
-      feedData.unshift(randomItem);
-      renderFeed();
-    }
-
-    setInterval(() => {
-      countdown--;
-      if (countdown <= 0) {
-        countdown = 10;
-        simulateNewAd();
-      }
-      document.getElementById('refresh-timer').innerText = `Prochain scan auto dans ${countdown}s`;
-    }, 1000);
-
-    renderFeed();
+    // Actualisation automatique toutes les 10 secondes depuis le fichier JSON GitHub
+    setInterval(loadData, 10000);
   </script>
 </body>
 </html>
